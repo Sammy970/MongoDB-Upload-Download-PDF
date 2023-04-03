@@ -1,7 +1,10 @@
 const express = require('express')
-const { MongoClient } = require('mongodb')
+const { MongoClient, Binary } = require('mongodb')
 const bodyParser = require('body-parser');
 const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+
 
 // const uri = "mongodb+srv://samyakTest:samyakTest@testcluster.eqeij01.mongodb.net/test"
 const uri = "mongodb+srv://samyak970:samyak970@dbms.krybkqj.mongodb.net/test"
@@ -10,6 +13,9 @@ const colName = "PDF"
 
 const app = express();
 const client = new MongoClient(uri)
+
+const upload = multer({ dest: 'uploads/' });
+
 
 
 async function getDBNames() {
@@ -55,6 +61,24 @@ async function downloadPDF(databaseName, collectionName, dataName) {
     fs.writeFileSync(fileName, data1, 'binary');
 }
 
+async function uploadPDF(databaseName, collectionName, pdfName, pdfFilePath) {
+    await client.connect();
+    const database = client.db(databaseName)
+    const collection = database.collection(collectionName);
+
+    const pdfFileData = fs.readFileSync(pdfFilePath);
+
+    const pdfDocument = {
+        name: pdfName,
+        data: new Binary(pdfFileData),
+        contentType: "application/pdf",
+        uploadDate: new Date(),
+    }
+
+    const result = await collection.insertOne(pdfDocument);
+    await client.close;
+}
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw({ type: 'application/pdf', limit: '10mb' }));
@@ -67,6 +91,7 @@ app.get('/', async (req, res) => {
     res.render('index', { dbList });
 })
 
+// Downloading PDF
 app.post('/filter1', async (req, res) => {
     const formdata = req.body.filter;
     const colList = await getColNames(formdata);
@@ -81,7 +106,7 @@ app.post('/filter2', async (req, res) => {
     // console.log(data);
 })
 
-app.post('/download', async (req, res) => {
+app.post('/filter3', async (req, res) => {
 
     const databaseName = req.body.data1;
     const collectionName = req.body.data2;
@@ -93,7 +118,7 @@ app.post('/download', async (req, res) => {
     // res.redirect('/test');
 })
 
-app.get('/test', (req, res) => {
+app.get('/download', (req, res) => {
     var dataName = app.locals.dataName;
 
     const filePath = './' + dataName + '.pdf';
@@ -117,6 +142,48 @@ app.get('/test', (req, res) => {
         });
     });
 })
+
+// Uploading PDF
+app.post('/filter4', async (req, res) => {
+    app.locals.databaseName = req.body.filterUP;
+    const colList = await getColNames(app.locals.databaseName);
+    res.send(colList);
+})
+
+app.post('/filter5', upload.single('pdf'), async (req, res) => {
+    const databaseName = app.locals.databaseName;
+    const collectionName = req.body.filterUP;
+    const pdfName = req.body.pdfName;
+    const pdfFilePath = req.file.path;
+
+    await uploadPDF(databaseName, collectionName, pdfName, pdfFilePath);
+
+    uploadFolderPath = "./uploads"
+
+    fs.readdir(uploadFolderPath, (err, files) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        // Loop through all the files in the folder
+        files.forEach(file => {
+            // Delete the file
+            fs.unlink(`${uploadFolderPath}/${file}`, err => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                console.log(`Deleted file: ${file}`);
+            });
+        });
+    })
+
+    res.status(200).send("Success");
+
+})
+
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

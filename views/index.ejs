@@ -6,7 +6,43 @@
 </head>
 
 <body>
-    <h1>Filter 1: Select Database</h1>
+
+    <h1>Uploading Functions</h1>
+
+    <h2>Filter 1: Select Database</h2>
+    <form id="myform4" action="/filter4" , method="POST" enctype="multipart/form-data">
+        <label for="filterUP">Filter DB</label>
+        <select name="filterUP" id="filterUP">
+            <% dbList.forEach(function(name) { %>
+                <option value="<%= name %>">
+                    <%= name %>
+                </option>
+                <% }); %>
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Filter 2: Select Collections</h2>
+    <form id="myform5" action="/filter5" , method="POST" enctype="multipart/form-data">
+        <label for="filterUP">Filter Collections</label>
+        <select name="filterUP" id="filterUP">
+        </select>
+
+        <label for="pdfName">PDF Name</label>
+        <input type="text" name="pdfName" id="pdfName" required>
+
+        <br> <br>
+
+        <label for="file">Select PDF</label>
+        <input type="file" name="pdf">
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <h3>------------------------------------------------------------------------</h3>
+    <h1>Downloading Functions</h1>
+
+    <h2>Filter 1: Select Database</h2>
     <form id="myform1" action="/filter1" , method="POST" enctype="multipart/form-data">
         <label for="filter">Filter DB</label>
         <select name="filter" id="filter">
@@ -19,7 +55,7 @@
         <button type="submit">Submit</button>
     </form>
 
-    <h1>Filter 2: Select Collections</h1>
+    <h2>Filter 2: Select Collections</h2>
     <form id="myform2" action="/filter2" , method="POST" enctype="multipart/form-data">
         <label for="filter2">Filter Collections</label>
         <select name="filter2" id="filter2">
@@ -27,8 +63,8 @@
         <button type="submit">Submit</button>
     </form>
 
-    <h1>Filter 3: Select Data</h1>
-    <form id="myform3" action="/download" , method="POST" enctype="multipart/form-data">
+    <h2>Filter 3: Select Data</h2>
+    <form id="myform3" action="/filter3" , method="POST" enctype="multipart/form-data">
         <label for="filter3">Filter Data</label>
         <select name="filter3" id="filter3">
         </select>
@@ -36,7 +72,6 @@
     </form>
 
     <br><br>
-    <!-- <a href="/test">Download File</a> -->
 
     <div id="download">
     </div>
@@ -110,11 +145,29 @@
                     // console.log(response);
                     $("#download").empty();
                     $("#download").append(
-                        '<a href="/test">Download the File</a>'
+                        '<a href="/download">Download the File</a>'
                     )
 
 
                 })
+            })
+
+            $('#myform4').submit(function (event) {
+                event.preventDefault();
+                const form = $(this);
+                const url = form.attr('action');
+                const data = form.serialize();
+                // console.log(url);
+                $.post(url, data, function (response) {
+                    // console.log(response);
+                    $("#myform5 select").empty();
+                    response.forEach(function (name) {
+                        $("#myform5 select").append(
+                            '<option value="' + name + '">' + name + '</option>'
+                        )
+                    })
+
+                });
             })
 
         })
