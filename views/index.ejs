@@ -64,17 +64,19 @@
     </form>
 
     <h2>Filter 3: Select Data</h2>
-    <form id="myform3" action="/filter3" , method="POST" enctype="multipart/form-data">
+    <form id="myform3" action="/filter3" , method="POST" enctype="multipart/form-data" target="_blank">
         <label for="filter3">Filter Data</label>
         <select name="filter3" id="filter3">
         </select>
         <button type="submit">Submit</button>
     </form>
 
-    <br><br>
+    <br> <br>
 
     <div id="download">
     </div>
+
+    <h3>------------------------------------------------------------------------</h3>
 
     <!-- import jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -145,6 +147,7 @@
                     // console.log(response);
                     $("#download").empty();
                     $("#download").append(
+                        '<form method="POST" target="_blank"><a href="/preview">Preview the File</a></form>', '<br><br>',
                         '<a href="/download">Download the File</a>'
                     )
 

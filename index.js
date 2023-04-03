@@ -79,6 +79,21 @@ async function uploadPDF(databaseName, collectionName, pdfName, pdfFilePath) {
     await client.close;
 }
 
+async function previewPDF(databaseName, collectionName, dataName, res) {
+    await client.connect();
+    const database = client.db(databaseName)
+    const collection = database.collection(collectionName);
+
+    const find = await collection.findOne({ name: dataName });
+    const data1 = find.data.buffer;
+    const fileName = dataName + '.pdf';
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+
+    res.send(data1);
+}
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw({ type: 'application/pdf', limit: '10mb' }));
@@ -108,11 +123,11 @@ app.post('/filter2', async (req, res) => {
 
 app.post('/filter3', async (req, res) => {
 
-    const databaseName = req.body.data1;
-    const collectionName = req.body.data2;
+    app.locals.databaseName = req.body.data1;
+    app.locals.collectionName = req.body.data2;
     app.locals.dataName = req.body.data3;
 
-    await downloadPDF(databaseName, collectionName, app.locals.dataName);
+    await downloadPDF(app.locals.databaseName, app.locals.collectionName, app.locals.dataName);
 
     res.send("Goa")
     // res.redirect('/test');
@@ -181,6 +196,14 @@ app.post('/filter5', upload.single('pdf'), async (req, res) => {
 
     res.status(200).send("Success");
 
+})
+
+// Preview PDF
+app.get('/preview', async (req, res) => {
+    var databaseName = app.locals.databaseName
+    var collectionName = app.locals.collectionName
+    var dataName = app.locals.dataName
+    previewPDF(databaseName, collectionName, dataName, res);
 })
 
 
