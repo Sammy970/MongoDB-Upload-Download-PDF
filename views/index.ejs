@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Test</title>
+</head>
+
+<body>
+    <h1>Filter 1: Select Database</h1>
+    <form id="myform1" action="/filter1" , method="POST" enctype="multipart/form-data">
+        <label for="filter">Filter DB</label>
+        <select name="filter" id="filter">
+            <% dbList.forEach(function(name) { %>
+                <option value="<%= name %>">
+                    <%= name %>
+                </option>
+                <% }); %>
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h1>Filter 2: Select Collections</h1>
+    <form id="myform2" action="/filter2" , method="POST" enctype="multipart/form-data">
+        <label for="filter2">Filter Collections</label>
+        <select name="filter2" id="filter2">
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h1>Filter 3: Select Data</h1>
+    <form id="myform3" action="/download" , method="POST" enctype="multipart/form-data">
+        <label for="filter3">Filter Data</label>
+        <select name="filter3" id="filter3">
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+
+    <br><br>
+    <!-- <a href="/test">Download File</a> -->
+
+    <div id="download">
+    </div>
+
+    <!-- import jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#myform1').submit(function (event) {
+                event.preventDefault();
+                // const data = $("#filter").val();
+                // const url = $("#myform1").attr('action')
+
+                const form = $(this);
+                const url = form.attr('action');
+                const data = form.serialize();
+                // console.log(url);
+                $.post(url, data, function (response) {
+                    // console.log(response);
+                    $("#myform2 select").empty();
+                    response.forEach(function (name) {
+                        $("#myform2 select").append(
+                            '<option value="' + name + '">' + name + '</option>'
+                        )
+                    })
+
+                });
+            })
+
+            $('#myform2').submit(function (event) {
+                event.preventDefault();
+                const form = $(this);
+                const url = form.attr('action');
+                const data1 = $("#myform1 select").val();
+                const data2 = $("#myform2 select").val();
+
+                const data = {
+                    "data1": data1,
+                    "data2": data2,
+                }
+
+                $.post(url, data, function (response) {
+                    // console.log(response);
+                    $("#myform3 select").empty();
+                    response.forEach(function (name) {
+                        $("#myform3 select").append(
+                            '<option value="' + name + '">' + name + '</option>'
+                        )
+                    })
+                });
+            })
+
+            $('#myform3').submit(function (event) {
+                event.preventDefault();
+                const form = $(this);
+                const url = form.attr('action');
+                const data1 = $("#myform1 select").val();
+                const data2 = $("#myform2 select").val();
+                const data3 = $("#myform3 select").val();
+
+                const data = {
+                    "data1": data1,
+                    "data2": data2,
+                    "data3": data3,
+                }
+
+                $.post(url, data, function (response) {
+                    // console.log(response);
+                    $("#download").empty();
+                    $("#download").append(
+                        '<a href="/test">Download the File</a>'
+                    )
+
+
+                })
+            })
+
+        })
+    </script>
+</body>
+
+</html>
